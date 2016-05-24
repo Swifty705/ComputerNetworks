@@ -13,15 +13,22 @@
 * java.io.* for PrintWriter and BufferedReader (might not need
 */
 
+import java.io.IOException;
 import java.net.*;
 
 class Client {
-public static void main( String[] args) {
-int port = 4444;
-Socket socket;
+    public static void main(String[] args) throws IOException {
 
-/* parce args[0] to get ip address */
+        if (args.length != 1) {
+            System.err.println(
+                    "Usage: java EchoClient <host name>");
+            System.exit(1);
+        }
 
-/* direct socket input to stdout, and direct stdin to socket output */
-}//end main
+        String hostName = args[0];
+        int portNumber = 4444;
+        Socket socket = new Socket(hostName, portNumber);
+
+        /* direct socket input to stdout, and direct stdin to socket output */
+    }//end main
 }//end client class
