@@ -1,6 +1,17 @@
+/* class: InputThread.java
+* Authors:  Theodore Cooke, Matt Swift, and Frank Liang
+*
+* description:
+* creates a stream from standard input to a socket output
+* 
+* imports:
+* java.net.* for Socket and clientSocket
+* java.io.* for PrintWriter and BufferedReader 
+*/
+
+
 import java.io.*;
 import java.net.*;
-//import java.lang.*;
 
 
 public class InputThread implements Runnable
@@ -11,22 +22,22 @@ public InputThread(Socket s)
 
 
 public void run() 
-{String line;
-Socket s = socket;
-try
-(
+{String inputLine;
+
+try (
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-){
+
             BufferedReader stdIn =
                 new BufferedReader(new InputStreamReader(System.in));
-
-while(  (line = stdIn.readLine()) != null)
-{System.err.println("sending "+line);
-	out.println(line);
-	out.println(line);
+){
+while(  (inputLine = stdIn.readLine()) != null)
+{System.err.println("sending "+inputLine);
+	out.println(inputLine);
+//g	out.println(line);
 }
 }catch (IOException e)
-{System.err.println("Error: failed to establish stream to the server");
+{System.err.println("Error: failed to connect to the server");
+System.err.println("Error: failed to connect to the server");
 }finally
 {System.exit(1);}
 }//end inputDaemon
