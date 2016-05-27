@@ -7,7 +7,7 @@
 * performs handshakes with users
 * passes validated client sockets to the router
 * 
-* invoke: java server
+* invoke: java Server
 * port number is hardcoded
 * 
 * imports:
@@ -15,37 +15,27 @@
 * java.io.* for PrintWriter and BufferedReader (might not need
 */
 
-import java.io.*;
 import java.net.*;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Server {
-static Router router;
+    public static void main(String[] args) throws IOException {
+        //Hash Map to be passed into a server thread.
+        Map<String, Socket> users = new HashMap<>();
 
-public static void main( String[] args)  throws IOException {
-int port = 4444;
-router = new Router();
+        //port number for connections to the server.
+        int portNumber = 4444;
 
-/* create server socket */
-ServerSocket serverSocket = new ServerSocket( 4444);
-//error handling in case socket isn't created
-
-/*continually accept new sockets, passing them to the handshake function */
-while ( true )
-	handshake( serverSocket.accept());
-}//end main
-
-
-/* handshake function
-* establishes the client username
-* adds the client to the router
-* valid usernames follow same pattern as valid variables
-* params: Socket */
-private static void handshake( Socket s) {
-String username = "";
-
-/* write to socket, asking for username */
-/* validate username */
-/* add username to router */
-router.add( username, s);
-}//end handshake function
-}//end Server class
+        //attempt to listen and accept connections on the port, creating a new socket.
+        try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
+            while (true) {
+                new ServerThread(serverSocket.accept(), users).start();
+            }
+        } catch (IOException e) { //catch any connection exceptions.
+            System.err.println("Could not listen on port " + portNumber);
+            System.exit(-1);
+        }
+    }
+}
