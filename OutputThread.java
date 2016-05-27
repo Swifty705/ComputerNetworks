@@ -14,7 +14,7 @@ import java.io.*;
 import java.net.*;
 
 
-public class OutputThread implements Runnable
+public class OutputThread extends Thread
 {Socket socket;
 
 public OutputThread(Socket s)
@@ -28,8 +28,9 @@ try (
             BufferedReader in = new BufferedReader(
                 new InputStreamReader(socket.getInputStream()))
 ){
-            while ((outputLine = in.readLine()) != null) {
-                if (outputLine.equals("*Bye"))
+            while ((outputLine = in.readLine()) != null ) {
+System.err.println("read a line");
+                if (outputLine.equals("Bye."))
 {                System.out.println("*Server closed the connection");
 break;
 }
@@ -37,8 +38,12 @@ else
                 System.out.println(outputLine);
 }//end while
 }catch (IOException e)
-{System.err.println("Error: failed to get output stream from the server.");
-}finally
+{if (socket.isConnected())
+System.err.println("socket was just closed");
+else
+System.err.println("Error: failed to get output stream from the server.");}
+
+finally
 {System.exit(1);}
 }//end outputDaemon
 }//end class

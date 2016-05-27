@@ -30,16 +30,28 @@ else
 
         try (
             Socket socket = new Socket(hostName, portNumber);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+
+            BufferedReader stdIn =
+                new BufferedReader(new InputStreamReader(System.in));
         ) {
-System.out.println("Declared socket");
-(new  Thread(new OutputThread( socket))).start();
-Thread t = new  Thread(new InputThread( socket));
-t.start();
-//t.join();
-System.out.println("sleeping");
-Thread.sleep( Long.MAX_VALUE);
-System.out.println("waking");
-System.out.println("created threads");
+OutputThread outputThread = new  OutputThread( socket);
+
+outputThread.start();
+String inputLine;
+
+while(  (inputLine = stdIn.readLine()) != null)
+{System.err.println("sending |"+inputLine+"|");
+if ( inputLine.equals("/quit"))
+{System.out.println("quitting");
+outputThread.interrupt();
+socket.shutdownInput();
+break;
+}
+else
+	out.println(inputLine);
+}
+
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);
             System.exit(1);

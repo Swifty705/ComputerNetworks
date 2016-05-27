@@ -22,22 +22,12 @@ public InputThread(Socket s)
 
 
 public void run() 
-{String inputLine;
-
-try (
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-
-            BufferedReader stdIn =
-                new BufferedReader(new InputStreamReader(System.in));
-){
-while(  (inputLine = stdIn.readLine()) != null)
-{System.err.println("sending "+inputLine);
-	out.println(inputLine);
-//g	out.println(line);
-}
-}catch (IOException e)
-{System.err.println("Error: failed to get input stream from the server");
-}finally
+{
+//}catch (IOException e)
+//{System.err.println("Error: failed to get input stream from the server");
+}catch InterruptedException e)
+{System.err.println("input thread was interrupted");
+finally
 {System.exit(1);}
 }//end inputDaemon
 }//end class
