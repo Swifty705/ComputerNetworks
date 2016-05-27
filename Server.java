@@ -22,20 +22,18 @@ import java.util.Map;
 
 public class Server {
     public static void main(String[] args) throws IOException {
+        //Hash Map to be passed into a server thread.
         Map<String, Socket> users = new HashMap<>();
 
-        if (args.length != 1) {
-            System.err.println("Usage: java Server");
-            System.exit(1);
-        }
-
+        //port number for connections to the server.
         int portNumber = 4444;
 
+        //attempt to listen and accept connections on the port, creating a new socket.
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (true) {
                 new ServerThread(serverSocket.accept(), users).start();
             }
-        } catch (IOException e) {
+        } catch (IOException e) { //catch any connection exceptions.
             System.err.println("Could not listen on port " + portNumber);
             System.exit(-1);
         }
