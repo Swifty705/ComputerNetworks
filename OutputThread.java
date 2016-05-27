@@ -29,7 +29,6 @@ try (
                 new InputStreamReader(socket.getInputStream()))
 ){
             while ((outputLine = in.readLine()) != null ) {
-System.err.println("read a line");
                 if (outputLine.equals("Bye."))
 {                System.out.println("*Server closed the connection");
 break;
@@ -38,9 +37,7 @@ else
                 System.out.println(outputLine);
 }//end while
 }catch (IOException e)
-{if (socket.isConnected())
-System.err.println("socket was just closed");
-else
+{if (! socket.isConnected())
 System.err.println("Error: failed to get output stream from the server.");}
 
 finally

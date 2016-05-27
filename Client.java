@@ -41,7 +41,7 @@ outputThread.start();
 String inputLine;
 
 while(  (inputLine = stdIn.readLine()) != null)
-{System.err.println("sending |"+inputLine+"|");
+{
 if ( inputLine.equals("/quit"))
 {System.out.println("quitting");
 outputThread.interrupt();
@@ -60,7 +60,5 @@ else
                 hostName);
             System.exit(1);
         }
-System.out.println("closed");
-return;
     }
 }
