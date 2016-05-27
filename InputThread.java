@@ -36,8 +36,7 @@ while(  (inputLine = stdIn.readLine()) != null)
 //g	out.println(line);
 }
 }catch (IOException e)
-{System.err.println("Error: failed to connect to the server");
-System.err.println("Error: failed to connect to the server");
+{System.err.println("Error: failed to get input stream from the server");
 }finally
 {System.exit(1);}
 }//end inputDaemon

@@ -18,7 +18,7 @@ import java.io.*;
 import java.net.*;
 
 public class Client {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 final int portNumber = 4444;
 String hostName = "0.0.0.0";
         
@@ -30,37 +30,25 @@ else
 
         try (
             Socket socket = new Socket(hostName, portNumber);
-            BufferedReader in = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()))
         ) {
-(new  Thread(new InputThread( socket))).start();
-
-            String fromServer;
-
-//try {
-            while ((fromServer = in.readLine()) != null) {
-                if (fromServer.equals("*Bye"))
-{                System.out.println("*Server closed the connection");
-break;
-}
-else
-                System.out.println(fromServer);
-                
-            }
-/*}catch (UnknownHostException e)
-{System.err.println("Error: Stream from server was closed");
-//System.exit(1);
-throw e;
-}*/
+System.out.println("Declared socket");
+(new  Thread(new OutputThread( socket))).start();
+Thread t = new  Thread(new InputThread( socket));
+t.start();
+//t.join();
+System.out.println("sleeping");
+Thread.sleep( Long.MAX_VALUE);
+System.out.println("waking");
+System.out.println("created threads");
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);
             System.exit(1);
         } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to " +
+            System.err.println("Couldn't establish socket to " +
                 hostName);
             System.exit(1);
         }
-finally
-{System.exit(1);}
+System.out.println("closed");
+return;
     }
 }
