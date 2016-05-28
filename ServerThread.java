@@ -1,93 +1,98 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-/**
- * Created by Matthew on 2016-05-25.
+/*
+ * Copyright (c) 1995, 2013, Oracle and/or its affiliates. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *   - Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *   - Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ *   - Neither the name of Oracle or the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+ * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ServerThread extends Thread {
-    //Regex pattern to search for strings with a forward slash.
-    private Pattern pattern = Pattern.compile("/^/[a-z,0-9]+$/i");
-    //Socket to be used for connection, passed in constructor.
-    private Socket socket = null;
-    //Reference to a Hash Map created in the Server class, passed in constructor.
-    private Map<String, Socket> users = null;
 
-    //Constructor for Server Thread.
-    public ServerThread(Socket socket, Map<String, Socket> users){
+import java.net.*;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+
+public class ServerThread extends Thread {
+    private Socket socket = null;
+    private HashMap<String, Socket> users;
+
+    public ServerThread(Socket socket, HashMap<String, Socket> users) {
         super("ServerThread");
         this.socket = socket;
         this.users = users;
     }
 
-    //Mandatory method inherited from Thread
-    public void run(){
-        try(
-                //Print Writer to write to client. Grabs the Output Stream on the socket.
+    public void run() {
+
+        try (
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                //Input Stream Reader wrapped in a Buffered Reader, grabs input stream of socket.
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(
+                                socket.getInputStream()))
         ) {
-            //Declaring an input string, output string, and user name.
-            String inputLine, outputLine, userName;
-            //Output a welcome message.
-            out.println("Welcome to the Socket Rocket's Chat v1.\nIf you wish to send a Private Message type \'/\'<username>.\n" +
-                    "otherwise your message is broadcast. If you wish to see a list of connected users type \'/\'who.");
-            //Output a command to register a username.
-            out.println("First, please register a username: ");
+            String inputLine, outputLine, username;
 
-            //This next block sets up your username.
-            if(in.readLine().equals("who")){
-                out.println("That username is unavailable, please choose another.");
-            } else {
-                userName = in.readLine();
-                add(userName, socket);
-            }
+            //This block is intended for welcoming the user and registering a username.
+            out.println("Welcome to the Socket Rocket's Chat Server v1. If you would like to send a " +
+                    "private message type /<username>, otherwise your message is broadcast. If you would " +
+                    "like to see a list of current users type /who. Please register a username: ");
+            if((username = in.readLine()) != null)
+                if(username.equals("who") || username.equals("quit"))
+                    throw new IOException("Sorry, that is an invalid username.");
+                users.put(username, socket);
 
-            //This next block is intended for sending a message.
-            //Some testing is thrown in as it's yet incomplete.
-            while((inputLine = in.readLine()) != null){
-
-                if(pattern.matcher(inputLine).find()){
-                    outputLine = "Match found!";
+            //This block is intended for sending your message.
+            while ((inputLine = in.readLine()) != null) {
+                if(inputLine.startsWith("/")){
+                    String receiver = inputLine.substring(1, inputLine.indexOf(" "));
+                    if(users.containsKey(receiver))
+                        privateMessage(username, users.get(receiver), inputLine.substring(inputLine.indexOf(" "), inputLine.length()+1));
+                } else {
+                    outputLine = inputLine;
                     out.println(outputLine);
-                    int i = inputLine.indexOf(" ");
-                    String username = inputLine.substring(1, i);
-                    System.out.println(i);
-                    System.out.println(username);
                 }
-                //outputLine = inputLine;
+
+                if (inputLine.equals("/quit"))
+                    break;
             }
-            //Close the connection.
             socket.close();
-            //Catch any exceptions.
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    //send a private message. TO DO.
-    private void privateMessage(String senderUsername, Socket receiver, String msg){
-
-    }
-
-    //send a broadcast. TO DO.
-    private void broadcast(Socket sender, String msg){
-
-    }
-
-    //Add a user to the hash table.
-    private void add(String username, Socket s){
-        if(!users.containsKey(username))
-            users.put(username, s);
-    }
-
-    //Show a list of users. TO DO.
-    private void showUsers(){
-
+    private void privateMessage(String sender, Socket receiver, String msg){
+        String privateOutput;
+        try {
+            PrintWriter out = new PrintWriter(receiver.getOutputStream(), true);
+            privateOutput = sender + ":" + msg;
+            out.println(privateOutput);
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
+
