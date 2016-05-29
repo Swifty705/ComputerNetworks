@@ -33,14 +33,20 @@ import java.net.*;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.*;
 
 public class ServerThread extends Thread {
+public static Pattern userName_pattern;
+public static Pattern input_pattern;
+private Matcher matcher;
     private static HashMap<String, PrintWriter> users = null;
     private Socket socket = null;
+private PrintWriter output;
 
-    public ServerThread(Socket socket, HashMap<String, PrintWriter> userEntries) {
+    public ServerThread(Socket socket, HashMap<String, PrintWriter> userEntries) throws IOException {
         super("ServerThread");
         this.socket = socket;
+this.output = new PrintWriter(socket.getOutputStream(), true);
         users = userEntries;
     }
 
@@ -52,8 +58,14 @@ public class ServerThread extends Thread {
                                 socket.getInputStream()))
         ) {
             String inputLine, outputLine, username;
-            username = in.readLine();
-            users.put(username, new PrintWriter(socket.getOutputStream(), true));
+
+while ( !  (matcher = userName_pattern.matcher( in.readLine())).find())
+	{output.println("sorry, usernames can only contain letters and numbers");
+	output.println("Please enter another username> ");
+	}
+username = matcher.group(1);
+            this.output.println("You entered: " + username);
+            users.put(username, this.output);
 
             while ((inputLine = in.readLine()) != null) {
                 outputLine = inputLine;

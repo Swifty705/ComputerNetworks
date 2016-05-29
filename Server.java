@@ -32,12 +32,14 @@
 import java.net.*;
 import java.io.*;
 import java.util.HashMap;
+import java.util.regex.*;
 
 public class Server {
-    private static HashMap<String, PrintWriter> users = new HashMap<>();
+    private static HashMap<String, PrintWriter> users=  new HashMap<>();
 
     public static void main(String[] args) throws IOException {
         int portNumber = 4444;
+ServerThread.userName_pattern = Pattern.compile("^(\\w+)\\s*");
 
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (true) {
