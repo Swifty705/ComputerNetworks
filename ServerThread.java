@@ -35,10 +35,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ServerThread extends Thread {
-    private static HashMap<String, Socket> users = null;
+    private static HashMap<String, PrintWriter> users = null;
     private Socket socket = null;
 
-    public ServerThread(Socket socket, HashMap<String, Socket> userEntries) {
+    public ServerThread(Socket socket, HashMap<String, PrintWriter> userEntries) {
         super("ServerThread");
         this.socket = socket;
         users = userEntries;
@@ -47,23 +47,28 @@ public class ServerThread extends Thread {
     public void run() {
 
         try (
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(
                                 socket.getInputStream()))
         ) {
             String inputLine, outputLine, username;
             username = in.readLine();
-            out.println("You entered: " + username);
-            users.put(username, socket);
-
-            for(Map.Entry<String, Socket> entry : users.entrySet()){
-                out.println(entry.getKey());
-            }
+            users.put(username, new PrintWriter(socket.getOutputStream(), true));
 
             while ((inputLine = in.readLine()) != null) {
                 outputLine = inputLine;
-                out.println(outputLine);
+                if(inputLine.startsWith("/")){
+                    int i = outputLine.indexOf(" ");
+                    String user = outputLine.substring(1, i);
+                    String message = outputLine.substring(i+1, outputLine.length());
+                    users.get(user).println(username + ": " + message);
+                } else {
+                    for(Map.Entry<String, PrintWriter> entry : users.entrySet()){
+                        if(!entry.getKey().equals(username))
+                            entry.getValue().println(username + ": " + outputLine);
+                    }
+                }
+
                 if (outputLine.equals("Bye"))
                     break;
             }

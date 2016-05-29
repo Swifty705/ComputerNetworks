@@ -14,33 +14,33 @@ import java.io.*;
 import java.net.*;
 
 
-public class OutputThread extends Thread
-{Socket socket;
+public class OutputThread extends Thread {
+    Socket socket;
 
-public OutputThread(Socket s)
-{this.socket = s;}
+    public OutputThread(Socket s) {
+        this.socket = s;
+    }
 
 
-public void run() 
-{String outputLine;
+    public void run() {
+        String outputLine;
 
-try (
-            BufferedReader in = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()))
-){
-            while ((outputLine = in.readLine()) != null ) {
-                if (outputLine.equals("Bye."))
-{                System.out.println("*Server closed the connection");
-break;
-}
-else
-                System.out.println(outputLine);
-}//end while
-}catch (IOException e)
-{if (! socket.isConnected())
-System.err.println("Error: failed to get output stream from the server.");}
-
-finally
-{System.exit(1);}
-}//end outputDaemon
+        try (
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(socket.getInputStream()))
+        ) {
+            while ((outputLine = in.readLine()) != null) {
+                if (outputLine.equals("Bye.")) {
+                    System.out.println("*Server closed the connection");
+                    break;
+                } else
+                    System.out.println(outputLine);
+            }//end while
+        } catch (IOException e) {
+            if (!socket.isConnected())
+                System.err.println("Error: failed to get output stream from the server.");
+        } finally {
+            System.exit(1);
+        }
+    }//end outputDaemon
 }//end class

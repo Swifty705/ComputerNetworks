@@ -19,45 +19,42 @@ import java.net.*;
 
 public class Client {
     public static void main(String[] args) throws IOException, InterruptedException {
-final int portNumber = 4444;
-String hostName = "0.0.0.0";
-        
+        final int portNumber = 4444;
+        String hostName = "0.0.0.0";
+
         if (args.length == 0) {
             System.out.println("Using default host");
-        }
-else
-        hostName = args[0];
+        } else
+            hostName = args[0];
 
         try (
-            Socket socket = new Socket(hostName, portNumber);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                Socket socket = new Socket(hostName, portNumber);
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-            BufferedReader stdIn =
-                new BufferedReader(new InputStreamReader(System.in));
+                BufferedReader stdIn =
+                        new BufferedReader(new InputStreamReader(System.in))
         ) {
-OutputThread outputThread = new  OutputThread( socket);
+            OutputThread outputThread = new OutputThread(socket);
 
-outputThread.start();
-String inputLine;
+            outputThread.start();
+            String inputLine;
 
-while(  (inputLine = stdIn.readLine()) != null)
-{
-if ( inputLine.equals("/quit"))
-{System.out.println("quitting");
-outputThread.interrupt();
-socket.shutdownInput();
-break;
-}
-else
-	out.println(inputLine);
-}
+            while ((inputLine = stdIn.readLine()) != null) {
+                if (inputLine.equals("/quit")) {
+                    System.out.println("quitting");
+                    outputThread.interrupt();
+                    socket.shutdownInput();
+                    break;
+                } else
+                    out.println(inputLine);
+            }
 
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);
             System.exit(1);
         } catch (IOException e) {
             System.err.println("Couldn't establish socket to " +
-                hostName);
+                    hostName);
             System.exit(1);
         }
     }

@@ -34,8 +34,9 @@ import java.io.*;
 import java.util.HashMap;
 
 public class Server {
+    private static HashMap<String, PrintWriter> users = new HashMap<>();
+
     public static void main(String[] args) throws IOException {
-        HashMap<String, Socket> users = new HashMap<>();
         int portNumber = 4444;
 
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
