@@ -68,11 +68,12 @@ username = matcher.group(1);
             users.put(username, this.output);
 
             while ((inputLine = in.readLine()) != null) {
+	matcher = input_pattern.matcher(inputLine);
                 outputLine = inputLine;
-                if(inputLine.startsWith("/")){
-                    int i = outputLine.indexOf(" ");
-                    String user = outputLine.substring(1, i);
-                    String message = outputLine.substring(i+1, outputLine.length());
+                if(matcher.find() ){ //the line starts with a slash
+		String cmd = matcher.group(1);
+		                    String user = matcher.group(2);
+		String message = matcher.group(3);
                     users.get(user).println(username + ": " + message);
                 } else {
                     for(Map.Entry<String, PrintWriter> entry : users.entrySet()){
