@@ -32,12 +32,12 @@
 import java.io.*;
 import java.net.*;
 
-public class MattsTestClient {
+public class TestClient {
     public static void main(String[] args) throws IOException {
         String hostName;
 
         if (args.length == 0) {
-            System.err.println("Using default host name 0.0.0.0");
+            System.err.println("Using default host 0.0.0.0");
             hostName = "0.0.0.0";
         } else hostName = args[0];
 
@@ -51,22 +51,27 @@ public class MattsTestClient {
         ) {
             BufferedReader stdIn =
                     new BufferedReader(new InputStreamReader(System.in));
-            String fromServer;
-            String fromUser;
+            String fromServer, fromUser, username;
 
-            fromServer = in.readLine();
-            while (fromServer != null) {
-                System.out.println("Server: " + fromServer);
+            System.out.print("Welcome to the Socket Rocket's Chat v1.\n" +
+                    "If you would like to send a private message type /<username> <message>.\n" +
+                    "If you would like to see a list of current users type /who.\n" +
+                    "If you would like to quit type /quit.\n" +
+                    "First, please register a username: ");
+            username = stdIn.readLine();
+            out.println(username);
+
+            while ((fromServer = in.readLine()) != null) {
+                System.out.println(fromServer);
 
                 fromUser = stdIn.readLine();
                 if (fromUser != null) {
                     if(fromUser.equals("/quit")){
                         System.out.println("Quitting...");
                         break;
-                    } else
-                        out.println(fromUser);
+                    }
+                    else out.println(fromUser);
                 }
-                fromServer = in.readLine();
             }
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);

@@ -35,13 +35,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ServerThread extends Thread {
+    private static HashMap<String, Socket> users = null;
     private Socket socket = null;
-    private HashMap<String, Socket> users;
 
-    public ServerThread(Socket socket, HashMap<String, Socket> users) {
+    public ServerThread(Socket socket, HashMap<String, Socket> userEntries) {
         super("ServerThread");
         this.socket = socket;
-        this.users = users;
+        users = userEntries;
     }
 
     public void run() {
@@ -53,43 +53,21 @@ public class ServerThread extends Thread {
                                 socket.getInputStream()))
         ) {
             String inputLine, outputLine, username;
+            username = in.readLine();
+            out.println("You entered: " + username);
+            users.put(username, socket);
 
-            //This block is intended for welcoming the user and registering a username.
-            out.println("Welcome to the Socket Rocket's Chat Server v1. If you would like to send a " +
-                    "private message type /<username>, otherwise your message is broadcast. If you would " +
-                    "like to see a list of current users type /who. Please register a username: ");
-            if((username = in.readLine()) != null)
-                if(username.equals("who") || username.equals("quit"))
-                    throw new IOException("Sorry, that is an invalid username.");
-                users.put(username, socket);
+            for(Map.Entry<String, Socket> entry : users.entrySet()){
+                out.println(entry.getKey());
+            }
 
-            //This block is intended for sending your message.
             while ((inputLine = in.readLine()) != null) {
-                if(inputLine.startsWith("/")){
-                    String receiver = inputLine.substring(1, inputLine.indexOf(" "));
-                    if(users.containsKey(receiver))
-                        privateMessage(username, users.get(receiver), inputLine.substring(inputLine.indexOf(" "), inputLine.length()+1));
-                } else {
-                    outputLine = inputLine;
-                    out.println(outputLine);
-                }
-
-                if (inputLine.equals("/quit"))
+                outputLine = inputLine;
+                out.println(outputLine);
+                if (outputLine.equals("Bye"))
                     break;
             }
             socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void privateMessage(String sender, Socket receiver, String msg){
-        String privateOutput;
-        try {
-            PrintWriter out = new PrintWriter(receiver.getOutputStream(), true);
-            privateOutput = sender + ":" + msg;
-            out.println(privateOutput);
-            out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
