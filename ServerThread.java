@@ -36,17 +36,17 @@ import java.util.Map;
 import java.util.regex.*;
 
 public class ServerThread extends Thread {
-public static Pattern userName_pattern;
-public static Pattern input_pattern;
-private Matcher matcher;
+    public static Pattern userName_pattern;
+    public static Pattern input_pattern;
+    private Matcher matcher;
     private static HashMap<String, PrintWriter> users = null;
     private Socket socket = null;
-private PrintWriter output;
+    private PrintWriter output;
 
     public ServerThread(Socket socket, HashMap<String, PrintWriter> userEntries) throws IOException {
         super("ServerThread");
         this.socket = socket;
-this.output = new PrintWriter(socket.getOutputStream(), true);
+        this.output = new PrintWriter(socket.getOutputStream(), true);
         users = userEntries;
     }
 
@@ -58,36 +58,55 @@ this.output = new PrintWriter(socket.getOutputStream(), true);
                                 socket.getInputStream()))
         ) {
             String inputLine, outputLine, username;
+            output.println("Welcome to the Socket Rocket's chat program v1.\n" +
+                    "If you would like to private message someone type /msg <username> <message>.\n" +
+                    "If you would like to list the current users type /who.\n" +
+                    "If you would like to quit type /quit.\n" +
+                    "Please register a username: ");
 
-while ( !  (matcher = userName_pattern.matcher( in.readLine())).find())
-	{output.println("sorry, usernames can only contain letters and numbers");
-	output.println("Please enter another username> ");
-	}
-username = matcher.group(1);
+            while (!(matcher = userName_pattern.matcher(in.readLine())).find()) {
+                output.println("Sorry, usernames can only contain letters and numbers.");
+                output.println("Please enter another username: ");
+            }
+
+            username = matcher.group(1);
             this.output.println("You entered: " + username);
             users.put(username, this.output);
 
             while ((inputLine = in.readLine()) != null) {
-	matcher = input_pattern.matcher(inputLine);
+                matcher = input_pattern.matcher(inputLine);
                 outputLine = inputLine;
-                if(matcher.find() ){ //the line starts with a slash
-		String cmd = matcher.group(1);
-		                    String user = matcher.group(2);
-		String message = matcher.group(3);
-                    users.get(user).println(username + ": " + message);
+                if (matcher.find()) { //the line starts with a slash
+                    String cmd = matcher.group(1);
+                    String user = matcher.group(2);
+                    String message = matcher.group(3);
+
+                    if(cmd.equals("who")){
+                        connectedUsers(username);
+                    } else if(cmd.equals("quit")){
+                        users.remove(username);
+                    } else if(cmd.equals("msg")){
+                        users.get(user).println(username + ": " + message);
+                    } else {
+                        output.println("Sorry, the server did not recognize that command.");
+                    }
                 } else {
-                    for(Map.Entry<String, PrintWriter> entry : users.entrySet()){
-                        if(!entry.getKey().equals(username))
+                    for (Map.Entry<String, PrintWriter> entry : users.entrySet()) {
+                        if (!entry.getKey().equals(username))
                             entry.getValue().println(username + ": " + outputLine);
                     }
                 }
-
-                if (outputLine.equals("Bye"))
-                    break;
             }
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void connectedUsers(String currentUser){
+        for(Map.Entry<String, PrintWriter> entry : users.entrySet()){
+            if(!entry.getKey().equals(currentUser))
+                output.println(entry.getKey());
         }
     }
 }

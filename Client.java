@@ -40,13 +40,13 @@ public class Client {
             String inputLine;
 
             while ((inputLine = stdIn.readLine()) != null) {
+                out.println(inputLine);
                 if (inputLine.equals("/quit")) {
                     System.out.println("quitting");
                     outputThread.interrupt();
                     socket.shutdownInput();
                     break;
-                } else
-                    out.println(inputLine);
+                }
             }
 
         } catch (UnknownHostException e) {
