@@ -54,15 +54,15 @@ public class ServerThread extends Thread {
 
         try (
                 BufferedReader in = new BufferedReader(
-                        new InputStreamReader(
-                                socket.getInputStream()))
-        ) {
+                new InputStreamReader(
+                    socket.getInputStream()))
+            ) {
             String inputLine, outputLine, username;
             output.println("Welcome to the Socket Rocket's chat program v1.\n" +
-                    "If you would like to private message someone type /msg <username> <message>.\n" +
-                    "If you would like to list the current users type /who.\n" +
-                    "If you would like to quit type /quit.\n" +
-                    "Please register a username: ");
+                           "If you would like to private message someone type /msg <username> <message>.\n" +
+                           "If you would like to list the current users type /who.\n" +
+                           "If you would like to quit type /quit.\n" +
+                           "Please register a username: ");
 
             while (!(matcher = userName_pattern.matcher(in.readLine())).find()) {
                 output.println("Sorry, usernames can only contain letters and numbers.");
@@ -70,7 +70,8 @@ public class ServerThread extends Thread {
             }
 
             username = matcher.group(1);
-            this.output.println("You entered: " + username);
+            this.output.format("Welcome, %s.\n", username);
+            connectedUsers(username);
             users.put(username, this.output);
 
             while ((inputLine = in.readLine()) != null) {
@@ -80,21 +81,21 @@ public class ServerThread extends Thread {
                     String cmd = matcher.group(1);
                     String user = matcher.group(2);
                     String message = matcher.group(3);
-System.out.format("%s commands %s to %s with %s\n", username, cmd, user, message);
-                    if(cmd.equals("who")){
+                    System.out.format("%s commands %s to %s with %s\n", username, cmd, user, message);
+                    if(cmd.equals("who")) {
                         connectedUsers(username);
-                    } else if(cmd.equals("quit")){
+                    } else if(cmd.equals("quit")) {
                         users.remove(username);
-                    } else if(cmd.equals("msg")){
-if ( "" == message)
-this.output.println("*Please supply a message to whisper to "+user);
-	 else if ( users.containsKey( user) ) {
+                    } else if(cmd.equals("msg")) {
+                        if ( "" == message)
+                            this.output.println("*Please supply a message to whisper to "+user);
+                        else if ( users.containsKey( user) ) {
 //System.out.format("username = %s\n", username);
 //System.out.format("message = %s\n", message);
-                        users.get(user).println(username + ": " + message);
-}//end if user exists
-else
-this.output.println("*No such user "+user);
+                            users.get(user).println(username + ": " + message);
+                        }//end if user exists
+                        else
+                            this.output.println("*No such user "+user);
                     } else {
                         output.println("Sorry, the server did not recognize that command.");
                     }
@@ -108,15 +109,15 @@ this.output.println("*No such user "+user);
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (NullPointerException e) {
+            System.out.println("error! "+e.getMessage());
+            e.printStackTrace();
         }
-catch (NullPointerException e)
-{System.out.println("error! "+e.getMessage());
-e.printStackTrace();
-}
     }
 
-    private void connectedUsers(String currentUser){
-        for(Map.Entry<String, PrintWriter> entry : users.entrySet()){
+    private void connectedUsers(String currentUser) {
+        output.println("Online users are:");
+        for(Map.Entry<String, PrintWriter> entry : users.entrySet()) {
             if(!entry.getKey().equals(currentUser))
                 output.println(entry.getKey());
         }
