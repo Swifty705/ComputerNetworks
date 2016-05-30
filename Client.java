@@ -19,31 +19,33 @@ import java.net.*;
 
 public class Client {
     public static void main(String[] args) throws IOException, InterruptedException {
-        final int portNumber = 4444;
-        String hostName = "0.0.0.0";
+        final int portNumber = 4444; //statically set port number.
+        String hostName = "0.0.0.0"; //default host.
 
         if (args.length == 0) {
             System.out.println("Using default host");
         } else
-            hostName = args[0];
+            hostName = args[0]; //if provided as argument, set the arg as hostname.
 
-        try (
+        try ( //try creating a new socket connection.
                 Socket socket = new Socket(hostName, portNumber);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
                 BufferedReader stdIn =
                         new BufferedReader(new InputStreamReader(System.in))
         ) {
-            OutputThread outputThread = new OutputThread(socket);
+            //pipe and process output through an output thread client-side.
+            ClientThread clientThread = new ClientThread(socket);
 
-            outputThread.start();
+            clientThread.start();
             String inputLine;
 
+            //listen for input on System.in
             while ((inputLine = stdIn.readLine()) != null) {
                 out.println(inputLine);
                 if (inputLine.equals("/quit")) {
-                    System.out.println("quitting");
-                    outputThread.interrupt();
+                    System.out.println("Quitting...");
+                    clientThread.interrupt();
                     socket.shutdownInput();
                     break;
                 }

@@ -1,32 +1,8 @@
 /*
- * Copyright (c) 1995, 2013, Oracle and/or its affiliates. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- *   - Neither the name of Oracle or the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
- * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    Authors: Theodore Cooke, Matt Swift, and Frank Liang
+    Description: Thread extension that handles routing messages
+    between all or two users. Allows for showing all connected users, and graceful shutdown.
+    To be used in conjunction with Server.java
  */
 
 import java.net.*;
@@ -43,6 +19,7 @@ public class ServerThread extends Thread {
     private Socket socket = null;
     private PrintWriter output;
 
+    //Constructor, parameters: Socket, HashMap, holds an instance reference to each.
     public ServerThread(Socket socket, HashMap<String, PrintWriter> userEntries) throws IOException {
         super("ServerThread");
         this.socket = socket;
@@ -54,71 +31,103 @@ public class ServerThread extends Thread {
 
         try (
                 BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                    socket.getInputStream()))
-            ) {
+                        new InputStreamReader(
+                                socket.getInputStream()))
+        ) {
+            //Declare input, output, and username strings.
             String inputLine, outputLine, username;
-            output.println("Welcome to the Socket Rocket's chat program v1.\n" +
-                           "If you would like to private message someone type /msg <username> <message>.\n" +
-                           "If you would like to list the current users type /who.\n" +
-                           "If you would like to quit type /quit.\n" +
-                           "Please register a username: ");
 
+            //Present a welcome message on connection.
+            output.println("Welcome to the Socket Rocket's chat program v1.\n" +
+                    "Partners on this project are: Ted Cooke, Frank Liang, and Matt Swift.\n" +
+                    "If you would like to private message someone type /msg <username> <message>.\n" +
+                    "If you would like to list the current users type /who.\n" +
+                    "If you would like to quit type /quit.\n" +
+                    "Please register a username: ");
+
+            //Loop until a proper username is entered.
             while (!(matcher = userName_pattern.matcher(in.readLine())).find()) {
                 output.println("Sorry, usernames can only contain letters and numbers.");
                 output.println("Please enter another username: ");
             }
 
+            //Capture the username from the pattern group.
             username = matcher.group(1);
+
+            //Welcome the newly registered user.
             this.output.format("Welcome, %s.\n", username);
-            connectedUsers(username);
+
+            /*Show a list of currently connected users upon username registration,
+            * by nature, this gets skipped over when the first user connects.*/
+            if(users.entrySet().size() > 0)
+                connectedUsers(username);
+
+            //Add the user to the HashMap of users.
             users.put(username, this.output);
 
+            //Indicate to currently connected users when another user connects.
+            if(users.entrySet().size() > 1){
+                for(Map.Entry<String, PrintWriter> entry : users.entrySet()){
+                    if(!entry.getKey().equals(username))
+                        entry.getValue().println(username + " connected.");
+                }
+            }
+
+            //Main input loop.
             while ((inputLine = in.readLine()) != null) {
+                //Create pattern matcher from input.
                 matcher = input_pattern.matcher(inputLine);
+                //Set the output to become the input.
                 outputLine = inputLine;
                 if (matcher.find()) { //the line starts with a slash
-                    String cmd = matcher.group(1);
-                    String user = matcher.group(2);
-                    String message = matcher.group(3);
+                    String cmd = matcher.group(1); //for commands like /msg, /who, /quit
+                    String user = matcher.group(2); //to capture the username.
+                    String message = matcher.group(3); //to capture the message.
                     System.out.format("%s commands %s to %s with %s\n", username, cmd, user, message);
-                    if(cmd.equals("who")) {
-                        connectedUsers(username);
-                    } else if(cmd.equals("quit")) {
-                        users.remove(username);
-                    } else if(cmd.equals("msg")) {
-                        if ( "" == message)
-                            this.output.println("*Please supply a message to whisper to "+user);
-                        else if ( users.containsKey( user) ) {
-//System.out.format("username = %s\n", username);
-//System.out.format("message = %s\n", message);
-                            users.get(user).println(username + ": " + message);
-                        }//end if user exists
-                        else
-                            this.output.println("*No such user "+user);
-                    } else {
-                        output.println("Sorry, the server did not recognize that command.");
+                    switch (cmd) {
+                        case "who":  //if /who
+                            connectedUsers(username); //list users.
+
+                            break;
+                        case "quit":  //if /quit
+                            users.remove(username); //remove this user.
+
+                            for (Map.Entry<String, PrintWriter> entry : users.entrySet())
+                                entry.getValue().println(username + " disconnected."); //message everyone that the user d/c'ed.
+                            break;
+                        case "msg":  //if /msg
+                            if ("" == message) //catch empty messages.
+                                this.output.println("*Please supply a message to whisper to " + user);
+                            else if (users.containsKey(user)) {
+                                users.get(user).println(username + ": " + message); //send message.
+                            }//end if user exists
+                            else
+                                this.output.println("*No such user " + user);
+                            break;
+                        default:
+                            output.println("Sorry, the server did not recognize that command.");
+                            break;
                     }
-                } else {
+                } else { //else broadcast your message.
                     for (Map.Entry<String, PrintWriter> entry : users.entrySet()) {
                         if (!entry.getKey().equals(username))
                             entry.getValue().println(username + ": " + outputLine);
                     }
-                }
+                } //end entire if-else block.
             }
-            socket.close();
-        } catch (IOException e) {
+            socket.close(); //close connection if user is no longer connected.
+        } catch (IOException e) { //catch exceptions.
             e.printStackTrace();
         } catch (NullPointerException e) {
-            System.out.println("error! "+e.getMessage());
+            System.out.println("error! " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    private void connectedUsers(String currentUser) {
+    private void connectedUsers(String currentUser) { //loop through hashmap and show connected users.
         output.println("Online users are:");
-        for(Map.Entry<String, PrintWriter> entry : users.entrySet()) {
-            if(!entry.getKey().equals(currentUser))
+        for (Map.Entry<String, PrintWriter> entry : users.entrySet()) {
+            if (!entry.getKey().equals(currentUser))
                 output.println(entry.getKey());
         }
     }

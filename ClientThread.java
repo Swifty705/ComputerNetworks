@@ -14,10 +14,10 @@ import java.io.*;
 import java.net.*;
 
 
-public class OutputThread extends Thread {
+public class ClientThread extends Thread {
     Socket socket;
 
-    public OutputThread(Socket s) {
+    public ClientThread(Socket s) {
         this.socket = s;
     }
 
@@ -37,10 +37,10 @@ public class OutputThread extends Thread {
                     System.out.println(outputLine);
             }//end while
         } catch (IOException e) {
-            if (!socket.isConnected())
+            if (!socket.isConnected()) {
                 System.err.println("Error: failed to get output stream from the server.");
-        } finally {
-            System.exit(1);
+                System.exit(1);
+            }
         }
     }//end outputDaemon
 }//end class
