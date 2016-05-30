@@ -39,8 +39,8 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
         int portNumber = 4444;
-        ServerThread.userName_pattern = Pattern.compile("^(\\w+)\\s*", Pattern.CASE_INSENSITIVE);
-        ServerThread.input_pattern = Pattern.compile("^/(\\w+) *(\\w*) *(\\.*)", Pattern.CASE_INSENSITIVE);
+        ServerThread.userName_pattern = Pattern.compile("^(\\w+)\\s*");
+        ServerThread.input_pattern = Pattern.compile("^/(\\w+) *(\\w*) *(.*)");
 
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (true) {

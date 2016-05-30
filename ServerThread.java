@@ -80,13 +80,21 @@ public class ServerThread extends Thread {
                     String cmd = matcher.group(1);
                     String user = matcher.group(2);
                     String message = matcher.group(3);
-
+System.out.format("%s commands %s to %s with %s\n", username, cmd, user, message);
                     if(cmd.equals("who")){
                         connectedUsers(username);
                     } else if(cmd.equals("quit")){
                         users.remove(username);
                     } else if(cmd.equals("msg")){
+if ( "" == message)
+this.output.println("*Please supply a message to whisper to "+user);
+	 else if ( users.containsKey( user) ) {
+//System.out.format("username = %s\n", username);
+//System.out.format("message = %s\n", message);
                         users.get(user).println(username + ": " + message);
+}//end if user exists
+else
+this.output.println("*No such user "+user);
                     } else {
                         output.println("Sorry, the server did not recognize that command.");
                     }
@@ -101,6 +109,10 @@ public class ServerThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+catch (NullPointerException e)
+{System.out.println("error! "+e.getMessage());
+e.printStackTrace();
+}
     }
 
     private void connectedUsers(String currentUser){
