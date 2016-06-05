@@ -18,7 +18,6 @@ public class ServerThread extends Thread {
     private static HashMap<String, PrintWriter> users = null;
     private Socket socket = null;
     private PrintWriter output;
-
     //Constructor, parameters: Socket, HashMap, holds an instance reference to each.
     public ServerThread(Socket socket, HashMap<String, PrintWriter> userEntries) throws IOException {
         super("ServerThread");
@@ -57,13 +56,12 @@ public class ServerThread extends Thread {
             //Welcome the newly registered user.
             this.output.format("Welcome, %s.\n", username);
 
-            /*Show a list of currently connected users upon username registration,
-            * by nature, this gets skipped over when the first user connects.*/
-            if(users.entrySet().size() > 0)
-                connectedUsers(username);
-
             //Add the user to the HashMap of users.
             users.put(username, this.output);
+
+            /*Show a list of currently connected users upon username registration,
+            * by nature, this gets skipped over when the first user connects.*/
+            connectedUsers(username);
 
             //Indicate to currently connected users when another user connects.
             if(users.entrySet().size() > 1){
@@ -125,11 +123,16 @@ public class ServerThread extends Thread {
     }
 
     private void connectedUsers(String currentUser) { //loop through hashmap and show connected users.
-        output.println("Online users are:");
-        for (Map.Entry<String, PrintWriter> entry : users.entrySet()) {
-            if (!entry.getKey().equals(currentUser))
-                output.println(entry.getKey());
+        if (users.entrySet().size() == 1) {
+            if (users.containsKey(currentUser))
+                output.println("No other users are online.");
+        } else {
+            output.println("Online users are:");
+            for (Map.Entry<String, PrintWriter> entry : users.entrySet())
+                if (!entry.getKey().equals(currentUser))
+                    output.println(entry.getKey());
         }
+
     }
 }
 
