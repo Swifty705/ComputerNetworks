@@ -54,7 +54,7 @@ public class KKMultiServerThread extends Thread {
             out.println(outputLine);
 
             while ((inputLine = in.readLine()) != null) {
-                outputLine = kkp.processInput(inputLine);
+                outputLine = inputLine;
                 out.println(outputLine);
                 if (outputLine.equals("Bye"))
                     break;

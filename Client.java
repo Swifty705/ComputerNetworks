@@ -19,45 +19,44 @@ import java.net.*;
 
 public class Client {
     public static void main(String[] args) throws IOException, InterruptedException {
-final int portNumber = 4444;
-String hostName = "0.0.0.0";
-        
+        final int portNumber = 4444; //statically set port number.
+        String hostName = "0.0.0.0"; //default host.
+
         if (args.length == 0) {
             System.out.println("Using default host");
-        }
-else
-        hostName = args[0];
+        } else
+            hostName = args[0]; //if provided as argument, set the arg as hostname.
 
-        try (
-            Socket socket = new Socket(hostName, portNumber);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        try ( //try creating a new socket connection.
+                Socket socket = new Socket(hostName, portNumber);
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-            BufferedReader stdIn =
-                new BufferedReader(new InputStreamReader(System.in));
+                BufferedReader stdIn =
+                        new BufferedReader(new InputStreamReader(System.in))
         ) {
-OutputThread outputThread = new  OutputThread( socket);
+            //pipe and process output through an output thread client-side.
+            ClientThread clientThread = new ClientThread(socket);
 
-outputThread.start();
-String inputLine;
+            clientThread.start();
+            String inputLine;
 
-while(  (inputLine = stdIn.readLine()) != null)
-{
-if ( inputLine.equals("/quit"))
-{System.out.println("quitting");
-outputThread.interrupt();
-socket.shutdownInput();
-break;
-}
-else
-	out.println(inputLine);
-}
+            //listen for input on System.in
+            while ((inputLine = stdIn.readLine()) != null) {
+                out.println(inputLine);
+                if (inputLine.equals("/quit")) {
+                    System.out.println("Quitting...");
+                    clientThread.interrupt();
+                    socket.shutdownInput();
+                    break;
+                }
+            }
 
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);
             System.exit(1);
         } catch (IOException e) {
             System.err.println("Couldn't establish socket to " +
-                hostName);
+                    hostName);
             System.exit(1);
         }
     }

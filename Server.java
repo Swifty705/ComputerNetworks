@@ -1,41 +1,36 @@
-/* program: server.java
-* Authors:  Theodore Cooke, Matt Swift, and Frank Liang
-*
-* description:
-*  bootstraps the server
-* accepts client sockets on port 4444
-* performs handshakes with users
-* passes validated client sockets to the router
-* 
-* invoke: java Server
-* port number is hardcoded
-* 
-* imports:
-* java.net.* for Socket and ServerSocket
-* java.io.* for PrintWriter and BufferedReader (might not need
-*/
+/*
+    Authors: Theodore Cooke, Matt Swift, Frank Liang.
+    Description: Creates a Server on port 4444
+    Routes messages between different clients.
+
+    invoke: java Server
+    no port number needed (hardcoded).
+ */
 
 import java.net.*;
 import java.io.*;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.regex.*;
 
 public class Server {
+    private static HashMap<String, PrintWriter> users = new HashMap<>();
+
     public static void main(String[] args) throws IOException {
-        //Hash Map to be passed into a server thread.
-        Map<String, Socket> users = new HashMap<>();
+        int portNumber = 4444; //statically set port number.
 
-        //port number for connections to the server.
-        int portNumber = 4444;
+        //define regex patterns.
+        ServerThread.userName_pattern = Pattern.compile("^(\\w+)\\s*");
+        ServerThread.input_pattern = Pattern.compile("^/(\\w+) *(\\w*) *(.*)");
 
-        //attempt to listen and accept connections on the port, creating a new socket.
+        //try listening for connections.
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (true) {
                 new ServerThread(serverSocket.accept(), users).start();
             }
-        } catch (IOException e) { //catch any connection exceptions.
+        } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);
             System.exit(-1);
         }
     }
+
 }
