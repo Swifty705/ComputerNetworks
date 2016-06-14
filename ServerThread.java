@@ -18,6 +18,7 @@ public class ServerThread extends Thread {
     private static HashMap<String, PrintWriter> users = null;
     private Socket socket = null;
     private PrintWriter output;
+
     //Constructor, parameters: Socket, HashMap, holds an instance reference to each.
     public ServerThread(Socket socket, HashMap<String, PrintWriter> userEntries) throws IOException {
         super("ServerThread");
@@ -35,14 +36,6 @@ public class ServerThread extends Thread {
         ) {
             //Declare input, output, and username strings.
             String inputLine, outputLine, username;
-
-            //Present a welcome message on connection.
-            output.println("Welcome to the Socket Rocket's chat program v1.\n" +
-                    "Partners on this project are: Ted Cooke, Frank Liang, and Matt Swift.\n" +
-                    "If you would like to private message someone type /msg <username> <message>.\n" +
-                    "If you would like to list the current users type /who.\n" +
-                    "If you would like to quit type /quit.\n" +
-                    "Please register a username: ");
 
             //Loop until a proper username is entered.
             while (!(matcher = userName_pattern.matcher(in.readLine())).find()) {
@@ -64,9 +57,9 @@ public class ServerThread extends Thread {
             connectedUsers(username);
 
             //Indicate to currently connected users when another user connects.
-            if(users.entrySet().size() > 1){
-                for(Map.Entry<String, PrintWriter> entry : users.entrySet()){
-                    if(!entry.getKey().equals(username))
+            if (users.entrySet().size() > 1) {
+                for (Map.Entry<String, PrintWriter> entry : users.entrySet()) {
+                    if (!entry.getKey().equals(username))
                         entry.getValue().println(username + " connected.");
                 }
             }
@@ -114,18 +107,21 @@ public class ServerThread extends Thread {
                 } //end entire if-else block.
             }
             socket.close(); //close connection if user is no longer connected.
+        } catch (SocketException e) {
+            System.out.println("Error! Did a client disconnect unexpectedly? " + e.getMessage() + ".");
         } catch (IOException e) { //catch exceptions.
             e.printStackTrace();
         } catch (NullPointerException e) {
-            System.out.println("error! " + e.getMessage());
+            System.out.println("Error! " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     private void connectedUsers(String currentUser) { //loop through hashmap and show connected users.
         if (users.entrySet().size() == 1) {
-            if (users.containsKey(currentUser))
+            if (users.containsKey(currentUser)){
                 output.println("No other users are online.");
+            }
         } else {
             output.println("Online users are:");
             for (Map.Entry<String, PrintWriter> entry : users.entrySet())

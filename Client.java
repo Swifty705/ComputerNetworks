@@ -23,7 +23,7 @@ public class Client {
         String hostName = "0.0.0.0"; //default host.
 
         if (args.length == 0) {
-            System.out.println("Using default host");
+            System.out.println("Using default host. If you wish to specify a host provide a hostname as an argument.");
         } else
             hostName = args[0]; //if provided as argument, set the arg as hostname.
 

@@ -29,11 +29,14 @@ public class ClientThread extends Thread {
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(socket.getInputStream()))
         ) {
+            //Present a welcome message on connection.
+            System.out.println("Welcome to the Socket Rocket's chat program v1. \n" +
+                    "Partners on this project are: Ted Cooke, Frank Liang, and Matt Swift.\n" +
+                    "If you would like to private message someone type /msg <username> <message>.\n" +
+                    "If you would like to list the current users type /who.\n" +
+                    "If you would like to quit type /quit.");
+            System.out.print("Please register a username: ");
             while ((outputLine = in.readLine()) != null) {
-                if (outputLine.equals("Bye.")) {
-                    System.out.println("*Server closed the connection");
-                    break;
-                } else
                     System.out.println(outputLine);
             }//end while
         } catch (IOException e) {
