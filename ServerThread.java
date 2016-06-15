@@ -18,6 +18,7 @@ public class ServerThread extends Thread {
     private static HashMap<String, PrintWriter> users = null;
     private Socket socket = null;
     private PrintWriter output;
+    private static final String KEY = "OUR CHAT PROGRAM";
 
     //Constructor, parameters: Socket, HashMap, holds an instance reference to each.
     public ServerThread(Socket socket, HashMap<String, PrintWriter> userEntries) throws IOException {
@@ -38,16 +39,16 @@ public class ServerThread extends Thread {
             String inputLine, outputLine, username;
 
             //Loop until a proper username is entered.
-            while (!(matcher = userName_pattern.matcher(in.readLine())).find()) {
-                output.println("Sorry, usernames can only contain letters and numbers.");
-                output.println("Please enter another username: ");
+            while (!(matcher = userName_pattern.matcher(new AES128().decrypt(KEY, in.readLine()))).find()) {
+                output.println(new AES128().encrypt(KEY, "Sorry, usernames can only contain letters and numbers."));
+                output.println(new AES128().encrypt(KEY, "Please enter another username: "));
             }
 
             //Capture the username from the pattern group.
             username = matcher.group(1);
 
             //Welcome the newly registered user.
-            this.output.format("Welcome, %s.\n", username);
+            this.output.println(new AES128().encrypt(KEY, String.format("Welcome, %s.", username)));
 
             //Add the user to the HashMap of users.
             users.put(username, this.output);
@@ -60,12 +61,12 @@ public class ServerThread extends Thread {
             if (users.entrySet().size() > 1) {
                 for (Map.Entry<String, PrintWriter> entry : users.entrySet()) {
                     if (!entry.getKey().equals(username))
-                        entry.getValue().println(username + " connected.");
+                        entry.getValue().println(new AES128().encrypt(KEY, username + " connected."));
                 }
             }
 
             //Main input loop.
-            while ((inputLine = in.readLine()) != null) {
+            while ((inputLine = new AES128().decrypt(KEY, in.readLine())) != null) {
                 //Create pattern matcher from input.
                 matcher = input_pattern.matcher(inputLine);
                 //Set the output to become the input.
@@ -84,25 +85,25 @@ public class ServerThread extends Thread {
                             users.remove(username); //remove this user.
 
                             for (Map.Entry<String, PrintWriter> entry : users.entrySet())
-                                entry.getValue().println(username + " disconnected."); //message everyone that the user d/c'ed.
+                                entry.getValue().println(new AES128().encrypt(KEY, username + " disconnected.")); //message everyone that the user d/c'ed.
                             break;
                         case "msg":  //if /msg
                             if ("" == message) //catch empty messages.
-                                this.output.println("*Please supply a message to whisper to " + user);
+                                this.output.println(new AES128().encrypt(KEY, "*Please supply a message to whisper to " + user));
                             else if (users.containsKey(user)) {
-                                users.get(user).println(username + ": " + message); //send message.
+                                users.get(user).println(new AES128().encrypt(KEY, username + ": " + message)); //send message.
                             }//end if user exists
                             else
-                                this.output.println("*No such user " + user);
+                                this.output.println(new AES128().encrypt(KEY, "*No such user " + user));
                             break;
                         default:
-                            output.println("Sorry, the server did not recognize that command.");
+                            output.println(new AES128().encrypt(KEY, "Sorry, the server did not recognize that command."));
                             break;
                     }
                 } else { //else broadcast your message.
                     for (Map.Entry<String, PrintWriter> entry : users.entrySet()) {
                         if (!entry.getKey().equals(username))
-                            entry.getValue().println(username + ": " + outputLine);
+                            entry.getValue().println(new AES128().encrypt(KEY, username + ": " + outputLine));
                     }
                 } //end entire if-else block.
             }
@@ -114,19 +115,21 @@ public class ServerThread extends Thread {
         } catch (NullPointerException e) {
             System.out.println("Error! " + e.getMessage());
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private void connectedUsers(String currentUser) { //loop through hashmap and show connected users.
+    private void connectedUsers(String currentUser) throws Exception { //loop through hashmap and show connected users.
         if (users.entrySet().size() == 1) {
             if (users.containsKey(currentUser)){
-                output.println("No other users are online.");
+                output.println(new AES128().encrypt(KEY, "No other users are online."));
             }
         } else {
-            output.println("Online users are:");
+            output.println(new AES128().encrypt(KEY, "Online users are:"));
             for (Map.Entry<String, PrintWriter> entry : users.entrySet())
                 if (!entry.getKey().equals(currentUser))
-                    output.println(entry.getKey());
+                    output.println(new AES128().encrypt(KEY, entry.getKey()));
         }
 
     }

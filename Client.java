@@ -13,12 +13,12 @@
 * java.io.* for PrintWriter and BufferedReader 
 */
 
-
 import java.io.*;
 import java.net.*;
 
 public class Client {
     public static void main(String[] args) throws IOException, InterruptedException {
+        final String KEY = "OUR CHAT PROGRAM";
         final int portNumber = 4444; //statically set port number.
         String hostName = "0.0.0.0"; //default host.
 
@@ -36,13 +36,12 @@ public class Client {
         ) {
             //pipe and process output through an output thread client-side.
             ClientThread clientThread = new ClientThread(socket);
-
             clientThread.start();
             String inputLine;
-
             //listen for input on System.in
             while ((inputLine = stdIn.readLine()) != null) {
-                out.println(inputLine);
+                //encrypt output using AES-128
+                out.println(new AES128().encrypt(KEY, inputLine));
                 if (inputLine.equals("/quit")) {
                     System.out.println("Quitting...");
                     clientThread.interrupt();
@@ -58,6 +57,8 @@ public class Client {
             System.err.println("Couldn't establish socket to " +
                     hostName);
             System.exit(1);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

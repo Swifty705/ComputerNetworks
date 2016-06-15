@@ -9,10 +9,8 @@
 * java.io.* for PrintWriter and BufferedReader 
 */
 
-
 import java.io.*;
 import java.net.*;
-
 
 public class ClientThread extends Thread {
     Socket socket;
@@ -20,6 +18,7 @@ public class ClientThread extends Thread {
     public ClientThread(Socket s) {
         this.socket = s;
     }
+    private static final String KEY = "OUR CHAT PROGRAM";
 
 
     public void run() {
@@ -37,13 +36,16 @@ public class ClientThread extends Thread {
                     "If you would like to quit type /quit.");
             System.out.print("Please register a username: ");
             while ((outputLine = in.readLine()) != null) {
-                    System.out.println(outputLine);
+                System.out.println("Encrypted: " + outputLine);
+                System.out.println(new AES128().decrypt(KEY, outputLine));
             }//end while
         } catch (IOException e) {
             if (!socket.isConnected()) {
                 System.err.println("Error: failed to get output stream from the server.");
                 System.exit(1);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }//end outputDaemon
 }//end class
