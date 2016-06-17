@@ -36,7 +36,6 @@ public class ClientThread extends Thread {
                     "If you would like to quit type /quit.");
             System.out.print("Please register a username: ");
             while ((outputLine = in.readLine()) != null) {
-                System.out.println("Encrypted: " + outputLine);
                 System.out.println(new AES128().decrypt(KEY, outputLine));
             }//end while
         } catch (IOException e) {

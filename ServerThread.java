@@ -66,16 +66,18 @@ public class ServerThread extends Thread {
             }
 
             //Main input loop.
-            while ((inputLine = new AES128().decrypt(KEY, in.readLine())) != null) {
-                //Create pattern matcher from input.
-                matcher = input_pattern.matcher(inputLine);
+            while ((inputLine = in.readLine()) != null) {
                 //Set the output to become the input.
-                outputLine = inputLine;
+                outputLine = new AES128().decrypt(KEY, inputLine);
+                //Create pattern matcher from input.
+                matcher = input_pattern.matcher(outputLine);
                 if (matcher.find()) { //the line starts with a slash
                     String cmd = matcher.group(1); //for commands like /msg, /who, /quit
                     String user = matcher.group(2); //to capture the username.
                     String message = matcher.group(3); //to capture the message.
-                    System.out.format("%s commands %s to %s with %s\n", username, cmd, user, message);
+                    if(user.equals("") && message.equals("")){
+                        System.out.format("%s issued the %s command.\n", username, cmd);
+                    } else System.out.format("%s sent a %s to %s with the message %s\n", username, cmd, user, message);
                     switch (cmd) {
                         case "who":  //if /who
                             connectedUsers(username); //list users.
