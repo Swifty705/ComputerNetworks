@@ -29,7 +29,7 @@ public class ClientThread extends Thread {
                         new InputStreamReader(socket.getInputStream()))
         ) {
             //Present a welcome message on connection.
-            System.out.println("Welcome to the Socket Rocket's chat program v1. \n" +
+            System.out.println("Welcome to the Socket Rocket's Chat Program! \n" +
                     "Partners on this project are: Ted Cooke, Frank Liang, and Matt Swift.\n" +
                     "If you would like to private message someone type /msg <username> <message>.\n" +
                     "If you would like to list the current users type /who.\n" +

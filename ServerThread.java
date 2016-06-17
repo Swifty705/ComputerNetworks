@@ -18,6 +18,7 @@ public class ServerThread extends Thread {
     private static HashMap<String, PrintWriter> users = null;
     private Socket socket = null;
     private PrintWriter output;
+    private String username;
     private static final String KEY = "OUR CHAT PROGRAM";
 
     //Constructor, parameters: Socket, HashMap, holds an instance reference to each.
@@ -36,7 +37,7 @@ public class ServerThread extends Thread {
                                 socket.getInputStream()))
         ) {
             //Declare input, output, and username strings.
-            String inputLine, outputLine, username;
+            String inputLine, outputLine;
 
             //Loop until a proper username is entered.
             while (!(matcher = userName_pattern.matcher(new AES128().decrypt(KEY, in.readLine()))).find()) {
@@ -111,7 +112,8 @@ public class ServerThread extends Thread {
             }
             socket.close(); //close connection if user is no longer connected.
         } catch (SocketException e) {
-            System.out.println("Error! Did a client disconnect unexpectedly? " + e.getMessage() + ".");
+            users.remove(username);
+            System.out.println("Error! " + username + " disconnected unexpectedly. " + e.getMessage() + ".");
         } catch (IOException e) { //catch exceptions.
             e.printStackTrace();
         } catch (NullPointerException e) {

@@ -15,24 +15,25 @@
 
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class Client {
     public static void main(String[] args) throws IOException, InterruptedException {
         final String KEY = "OUR CHAT PROGRAM";
         final int portNumber = 4444; //statically set port number.
-        String hostName = "0.0.0.0"; //default host.
-
-        if (args.length == 0) {
-            System.out.println("Using default host. If you wish to specify a host provide a hostname as an argument.");
-        } else
-            hostName = args[0]; //if provided as argument, set the arg as hostname.
+        Pattern ipPattern = Pattern.compile("^(?:(?:[0-9]{1,3}\\.){3}[0-9]{1,3}|localhost)$");
+        String hostName;
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter an IP address to connect to (enter \"localhost\" if you are hosting): ");
+        hostName = connect(ipPattern, scanner);
 
         try ( //try creating a new socket connection.
-                Socket socket = new Socket(hostName, portNumber);
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+              Socket socket = new Socket(hostName, portNumber);
+              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-                BufferedReader stdIn =
-                        new BufferedReader(new InputStreamReader(System.in))
+              BufferedReader stdIn =
+                      new BufferedReader(new InputStreamReader(System.in))
         ) {
             //pipe and process output through an output thread client-side.
             ClientThread clientThread = new ClientThread(socket);
@@ -50,15 +51,18 @@ public class Client {
                 }
             }
 
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host " + hostName);
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Couldn't establish socket to " +
-                    hostName);
-            System.exit(1);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.print("Oops! Something went wrong...\nError Message: " + e.getMessage()
+                    + "\nShutting down now...");
         }
+    }
+
+    private static String connect(Pattern ipPattern, Scanner scanner){
+        String hostName;
+        while (!ipPattern.matcher(hostName = scanner.next()).find()) {
+            System.out.println("Invalid IP. Please try again...");
+            System.out.print("Enter an IP address to connect to (enter \"localhost\" if you are hosting): ");
+        }
+        return hostName;
     }
 }
