@@ -29,12 +29,22 @@ public class ClientThread extends Thread {
                         new InputStreamReader(socket.getInputStream()))
         ) {
             //Present a welcome message on connection.
-            System.out.println("Welcome to the Socket Rocket's Chat Program! \n" +
-                    "Partners on this project are: Ted Cooke, Frank Liang, and Matt Swift.\n" +
-                    "If you would like to private message someone type /msg <username> <message>.\n" +
-                    "If you would like to list the current users type /who.\n" +
-                    "If you would like to quit type /quit.");
-            System.out.print("Please register a username: ");
+            System.out.println(
+                    "+---------------------------------------------------------------------------------------+\n" +
+                    "|     XXXXX XXXXX XXXXX X  X XXXXX XXXXX   XXXXX X   X XXXX XXXXX  X   X  XX     XXXX   |\n" +
+                    "|     X     X   X X     X X  X       X     X     X   X X  X   X    X   X   X     X  X   |\n" +
+                    "|     XXXXX X   X X     XX   XXXXX   X     X     XXXXX XXXX   X    X   X   X     X  X   |\n" +
+                    "|         X X   X X     X X  X       X     X     X   X X  X   X     X X    X     X  X   |\n" +
+                    "|     XXXXX XXXXX XXXXX X  X XXXXX   X     XXXXX X   X X  X   X      X    XXX  X XXXX   |\n" +
+                    "+---------------------------------------------------------------------------------------+\n" +
+                    "|Welcome to the Socket Rocket's Chat Program!                                           |\n" +
+                    "|Partners on this project are: Ted Cooke, Frank Liang, and Matt Swift.                  |\n" +
+                    "|If you'd like to broadcast a message simply type your message and hit [ENTER]          |\n" +
+                    "|If you'd like to private message someone type /msg <username> <message> and hit [ENTER]|\n" +
+                    "|If you'd like to list the current users type /who and hit [ENTER]                      |\n" +
+                    "|If you'd like to quit type /quit and hit [ENTER]                                       |\n" +
+                    "+---------------------------------------------------------------------------------------+");
+            System.out.print("Please register your username: ");
             while ((outputLine = in.readLine()) != null) {
                 System.out.println(new AES128().decrypt(KEY, outputLine));
             }//end while
