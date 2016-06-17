@@ -61,7 +61,7 @@ public class Client {
         String hostName;
         while (!ipPattern.matcher(hostName = scanner.next()).find()) {
             System.out.println("Invalid IP. Please try again...");
-            System.out.print("Enter an IP address to connect to (enter \"localhost\" if you are hosting): ");
+            System.out.print("Enter an IP to connect to (enter \"localhost\" if you are hosting): ");
         }
         return hostName;
     }
