@@ -27,6 +27,7 @@ public class ServerThread extends Thread {
         this.socket = socket;
         this.output = new PrintWriter(socket.getOutputStream(), true);
         users = userEntries;
+        System.out.println("Opening Connection...");
     }
 
     public void run() {
@@ -54,6 +55,8 @@ public class ServerThread extends Thread {
             //Add the user to the HashMap of users.
             users.put(username, this.output);
 
+            System.out.println(username + " connected.");
+
             /*Show a list of currently connected users upon username registration,
             * by nature, this gets skipped over when the first user connects.*/
             connectedUsers(username);
@@ -78,7 +81,7 @@ public class ServerThread extends Thread {
                     String message = matcher.group(3); //to capture the message.
                     if(user.equals("") && message.equals("")){
                         System.out.format("%s issued the %s command.\n", username, cmd);
-                    } else System.out.format("%s sent a %s to %s with the message %s\n", username, cmd, user, message);
+                    } else System.out.format("%s sent a %s to %s with the message \"%s\"\n", username, cmd, user, message);
                     switch (cmd) {
                         case "who":  //if /who
                             connectedUsers(username); //list users.
@@ -86,7 +89,7 @@ public class ServerThread extends Thread {
                             break;
                         case "quit":  //if /quit
                             users.remove(username); //remove this user.
-
+                            System.out.println(username + " disconnected gracefully.");
                             for (Map.Entry<String, PrintWriter> entry : users.entrySet())
                                 entry.getValue().println(new AES128().encrypt(KEY, username + " disconnected.")); //message everyone that the user d/c'ed.
                             break;
@@ -115,12 +118,11 @@ public class ServerThread extends Thread {
             users.remove(username);
             System.out.println("Error! " + username + " disconnected unexpectedly. " + e.getMessage() + ".");
         } catch (IOException e) { //catch exceptions.
-            e.printStackTrace();
+            System.out.print("Error! IOException: " + e.getMessage());
         } catch (NullPointerException e) {
-            System.out.println("Error! " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("Error! NullPointerException: " + e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Error! Exception occurred: " + e.getMessage());
         }
     }
 

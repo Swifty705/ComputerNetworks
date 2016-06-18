@@ -21,6 +21,8 @@ public class Server {
         //define regex patterns.
         ServerThread.userName_pattern = Pattern.compile("^(\\w+)\\s*");
         ServerThread.input_pattern = Pattern.compile("^/(\\w+) *(\\w*) *(.*)");
+		
+		System.out.println("Server started.\nNow listening for connections...");
 
         //try listening for connections.
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
