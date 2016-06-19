@@ -19,15 +19,15 @@ public class Server {
         int portNumber = 4444; //statically set port number.
 
         //define regex patterns.
-        ServerThread.userName_pattern = Pattern.compile("^(\\w+)\\s*");
-        ServerThread.input_pattern = Pattern.compile("^/(\\w+) *(\\w*) *(.*)");
+        ServerIOThread.userName_pattern = Pattern.compile("^(\\w+)\\s*");
+        ServerIOThread.input_pattern = Pattern.compile("^/(\\w+) *(\\w*) *(.*)");
 		
 		System.out.println("Server started.\nNow listening for connections...");
 
         //try listening for connections.
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             while (true) {
-                new ServerThread(serverSocket.accept(), users).start();
+                new ServerIOThread(serverSocket.accept(), users).start();
             }
         } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);

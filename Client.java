@@ -36,8 +36,8 @@ public class Client {
                       new BufferedReader(new InputStreamReader(System.in))
         ) {
             //pipe and process output through an output thread client-side.
-            ClientThread clientThread = new ClientThread(socket);
-            clientThread.start();
+            ClientOutputThread clientOutputThread = new ClientOutputThread(socket);
+            clientOutputThread.start();
             String inputLine;
             //listen for input on System.in
             while ((inputLine = stdIn.readLine()) != null) {
@@ -45,7 +45,7 @@ public class Client {
                 out.println(new AES128().encrypt(KEY, inputLine));
                 if (inputLine.equals("/quit")) {
                     System.out.println("Quitting...");
-                    clientThread.interrupt();
+                    clientOutputThread.interrupt();
                     socket.shutdownInput();
                     break;
                 }

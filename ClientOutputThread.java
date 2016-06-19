@@ -12,10 +12,10 @@
 import java.io.*;
 import java.net.*;
 
-public class ClientThread extends Thread {
+public class ClientOutputThread extends Thread {
     Socket socket;
 
-    public ClientThread(Socket s) {
+    public ClientOutputThread(Socket s) {
         this.socket = s;
     }
     private static final String KEY = "OUR CHAT PROGRAM";
@@ -46,7 +46,7 @@ public class ClientThread extends Thread {
                     "+---------------------------------------------------------------------------------------+");
             System.out.print("Please register your username: ");
             while ((outputLine = in.readLine()) != null) {
-                System.out.println(new AES128().decrypt(KEY, outputLine));
+                System.out.print("\n" + new AES128().decrypt(KEY, outputLine));
             }//end while
         } catch (IOException e) {
             if (!socket.isConnected()) {

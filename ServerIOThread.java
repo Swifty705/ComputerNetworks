@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.*;
 
-public class ServerThread extends Thread {
+public class ServerIOThread extends Thread {
     public static Pattern userName_pattern;
     public static Pattern input_pattern;
     private Matcher matcher;
@@ -22,7 +22,7 @@ public class ServerThread extends Thread {
     private static final String KEY = "OUR CHAT PROGRAM";
 
     //Constructor, parameters: Socket, HashMap, holds an instance reference to each.
-    public ServerThread(Socket socket, HashMap<String, PrintWriter> userEntries) throws IOException {
+    public ServerIOThread(Socket socket, HashMap<String, PrintWriter> userEntries) throws IOException {
         super("ServerThread");
         this.socket = socket;
         this.output = new PrintWriter(socket.getOutputStream(), true);
