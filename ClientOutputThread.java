@@ -46,7 +46,7 @@ public class ClientOutputThread extends Thread {
                     "+---------------------------------------------------------------------------------------+");
             System.out.print("Please register your username: ");
             while ((outputLine = in.readLine()) != null) {
-                System.out.print("\n" + new AES128().decrypt(KEY, outputLine));
+                System.out.println(new AES128().decrypt(KEY, outputLine));
             }//end while
         } catch (IOException e) {
             if (!socket.isConnected()) {
